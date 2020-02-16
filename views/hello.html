@@ -1,1 +1,113 @@
-<h1>Welcome, {{ name }}!</h1>
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+	<!-- 引入Vue -->
+	<script src="//cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+	<!-- 引入样式 -->
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/at-ui-style/css/at.min.css">
+	<!-- 引入组件库 -->
+	<script src="//cdn.jsdelivr.net/npm/at-ui/dist/at.min.js"></script>
+	<style>
+	  /* #app {
+	    display: flex;
+	    height: 100%;
+	    justify-content: center;
+	    align-items: center;
+	  } */
+	</style>
+</head>
+<body>
+	
+	<div id="app">
+		<div class=".container-fluid">
+			<div class="row at-row ">
+				<div class="col-md-20">
+					<at-card style="width: auto; height: 650px;" :no-hover="true" id="messagelist">
+					    <h4 slot="title">聊天内容</h4>
+					    <div style= "white-space: pre-wrap;">
+						    ${message}
+					    </div>
+					    <!-- <at-textarea placeholder="这里是聊天框..." style="width: auto; height: 550px;"></at-textarea> -->
+						<br>	
+						
+					</at-card>
+				</div>
+				<div class="col-md-4">
+					<at-card style="width: auto;height: 650px;" :no-hover="true" id="userlist">
+					  <h4 slot="title">用户</h4>
+					  <div>
+						Card Content
+					  </div>
+					</at-card>
+				</div>
+			</div>
+			<div class="row at-row">
+				<div class="col-md-20">
+					<at-card style="width:auto;" :body-style="{ padding: 0 }" :no-hover="true" id="submitlist">
+					  <div>
+						<div style="padding: 14px;">
+						  <div class="row at-row">
+						  	<div class="col-md-21">
+						  		<at-input placeholder="这里是聊天框..." v-model="text"></at-input>
+						  	</div>
+						  	<div class="col-md-2">
+						  		 <at-button type="info" v-on:click="submit" >信息按钮</at-button>
+						  	</div>
+						  </div>
+						</div>
+					  </div>
+					</at-card>
+				</div>
+			</div>
+			
+		</div>
+    </div>
+    <script type="text/javascript">
+		var messagelist = new Vue({
+            delimiters: ['${', '}'],
+			el:"#messagelist",
+			data:function(){
+				return {
+					message:''
+				}
+			}
+		});
+		var userlist = new Vue({
+			el:"#userlist"
+		});
+		var submitlist = new Vue({
+			el:"#submitlist",
+			data:function(){
+				return{
+					text:''
+				}
+			},
+			mounted:function(){
+					this.ws = new WebSocket("ws://localhost:3000")
+					this.ws.onopen = function () {
+						console.log("连接成功")
+					}
+					var _this = this
+					this.ws.onmessage = function (ev) {
+						// var item = JSON.parse(ev.data)
+						//_this.chatList.push(item)
+						var newmessage = ev.data;
+						messagelist.message += "\n·用户："+newmessage;
+						console.log(ev.data)
+					}
+			},
+			methods:{
+				submit:function(){
+						// var data = {
+						// 	nickName: this.nickName,
+						// 	content: this.content
+						// }
+						//将信息发送到后端
+						this.ws.send(JSON.stringify(this.text))
+				}
+			}
+		});
+	</script>
+</body>
+</html>
