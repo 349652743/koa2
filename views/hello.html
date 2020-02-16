@@ -25,9 +25,7 @@
 				<div class="col-md-20">
 					<at-card style="width: auto; height: 650px;" :no-hover="true" id="messagelist">
 					    <h4 slot="title">聊天内容</h4>
-					    <div style= "white-space: pre-wrap;">
-						    ${message}
-					    </div>
+                        <at-textarea v-model="message"  style= "white-space: pre-wrap;" readonly="true" min-rows="30" max-rows="30"></at-textarea>
 					    <!-- <at-textarea placeholder="这里是聊天框..." style="width: auto; height: 550px;"></at-textarea> -->
 						<br>	
 						

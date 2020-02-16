@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Koa = require('Koa');
+const Koa = require('koa');
 const path = require('path');
 const WebSocket = require('ws');
 const bodyParser = require('koa-bodyparser');
@@ -12,7 +12,7 @@ const controller = require('./controller.js');
 
 //静态文件Koa-static
 if (! isProduction) {
-    let KoaStatic = require('Koa-static');
+    let KoaStatic = require('koa-static');
     app.use(KoaStatic(path.join(__dirname,'./static')));
 }
 
