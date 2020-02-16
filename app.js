@@ -41,4 +41,7 @@ wss.on('connection',function (ws,req) {
         })
     })
 });
+wss.on('close', function close() {
+    console.log('disconnected');
+});
 console.log('app started at port 3000...');
