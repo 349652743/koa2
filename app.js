@@ -31,6 +31,12 @@ const wss = new WebSocketServer({
 });
 wss.on('connection',function (ws,req) {
     console.log(`[SERVER] connection()`);
+    //设置心跳检测
+    ws.isAlive = true;
+    ws.on('pong', function(){
+        this.isAlive = true;
+    });
+
     ws.on('message', function (message) {
         console.log(`[SERVER] Received: ${message}`);
         wss.clients.forEach(function(client){
@@ -38,9 +44,20 @@ wss.on('connection',function (ws,req) {
             var data = `当前在线人数为${number}人`;
             // console.log(message);
             client.send( message);
-        })
-    })
+        });
+    });
+
 });
+
+const interval = setInterval(function ping() {//三秒钟进行一次心跳检测
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+   
+      ws.isAlive = false;
+      ws.ping(noop);
+    });
+}, 30000);
+
 wss.on('close', function close() {
     console.log('disconnected');
 });

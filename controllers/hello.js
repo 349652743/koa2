@@ -6,5 +6,5 @@ var fn_hello = async (ctx, next) => {
 };
 
 module.exports = {
-    'GET /hello/chat': fn_hello
+    'GET /chat': fn_hello
 };
