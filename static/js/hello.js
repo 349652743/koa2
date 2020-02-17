@@ -4,7 +4,10 @@ var app = new Vue({
     data:function(){
         return {
             message:'',
-            text:''
+            text:'',
+            userlist:'',
+            dialogVisible:true,
+            username:''
         }
     },
     mounted:function(){
@@ -12,24 +15,56 @@ var app = new Vue({
         this.ws.onopen = function () {
             console.log("连接成功")
         }
-        var _this = this
+        var _this = this;
         this.ws.onmessage = function (ev) {
-            // var item = JSON.parse(ev.data)
+            var item = JSON.parse(ev.data)
             //_this.chatList.push(item)
-            var newmessage = ev.data;
-            _this.text += "\n·用户："+newmessage;
-            console.log(ev.data)
+            //console.log(item);
+            if(item.type===0){
+                _this.updatetext(item.data);
+                //console.log(ev.data)
+            }else if(item.type===1){
+                _this.userlist='';
+                for(user of item.userlist){
+                    _this.userlist +="\n·"+user;
+                }
+                if(item.data!="")
+                _this.updatetext(item.data);
+            }
         }
     },
     methods:{
         submit:function(){
-                // var data = {
-                // 	nickName: this.nickName,
-                // 	content: this.content
-                // }
+                var data = {
+                	username: this.username,
+                	message: this.message
+                }
                 //将信息发送到后端
-                this.ws.send(JSON.stringify(this.message))
-                this.message='';
+                console.log(this.message);
+                if(this.message===""){
+                    this.$message('请不要输入空消息');
+                }else {
+                    this.ws.send(JSON.stringify(data));
+                    this.message='';
+                }
+        },
+        dialogclose:function(){
+            this.dialogVisible=false;
+            var data = {
+                username: this.username,
+                message: ''
+            }
+            //将信息发送到后端
+            this.ws.send(JSON.stringify(data));
+            this.message='';
+
+        },
+        updatetext:function(str){
+            if(this.text===""){
+                this.text+="·"+str;
+            }else {
+                this.text+='\n·'+str;
+            }
         }
     }
 });
