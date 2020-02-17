@@ -11,7 +11,8 @@ var app = new Vue({
         }
     },
     mounted:function(){
-        this.ws = new WebSocket("ws://localhost:3000")
+        var url =  String(window.location.href).substr(7);
+        this.ws = new WebSocket("ws://"+url);
         this.ws.onopen = function () {
             console.log("连接成功")
         }
