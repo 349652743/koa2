@@ -34,6 +34,4 @@ const server = app.listen(3000);
 
 WebSocket(server);//聊天室服务共用3000端口
 
-
-
 console.log('app started at port 3000...');

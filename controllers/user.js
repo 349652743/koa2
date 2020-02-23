@@ -9,25 +9,48 @@ const User = require('../models/user.js')(sequelize,Sequelize);
 const Contest = require('../models/contest.js')(sequelize,Sequelize);
 
 async function addUser(ctx, next){//添加用户
-    // var token = ctx.request.body.token;
+    var token = ctx.request.body.token;
     var reqData = ctx.request.body.user;
     var resData = {status:400};
     console.log(reqData);
-    // try{
-    //     var decoded = await jwt.verify(token, serect);
-    // }catch(err){
-    //     status = 400;
-    // }
-    // if(decoded){
-        // console.log(reqData);
-    reqData.id = null;
-    reqData.haveQueried = false;
-    await User.create(reqData).then(user => {
-        console.log("user's auto-generated ID:", user.id);
-        resData.status= 200;
-        resData.id = user.id;
-    });
-    // }
+    try{
+        var decoded = await jwt.verify(token, serect);
+    }catch(err){
+        resData.status = 400;
+    }
+    if(decoded){//有token验证说明是管理员
+        console.log(reqData);
+        reqData.id = null;
+        reqData.haveQueried = false;
+        await User.create(reqData).then(user => {
+            console.log("user's auto-generated ID:", user.id);
+            resData.status = 200;
+            resData.id = user.id;
+        });
+    }else{//没有说明是普通用户注册
+        var flag = false;
+        await Contest.findByPk(reqData.contestId).then(project => {
+            if(project.dataValues.openRegister==true)flag = true;
+        })
+        if(flag){
+            var count = 0;
+            await User.count({ where: { studentId: reqData.studentId ,contestId : reqData.contestId}}).then(c => {
+                count = c;
+            })
+            if(count==0){
+                await User.create(reqData).then(user => {
+                    console.log("user's auto-generated ID:", user.id);
+                    resData.id = user.id;
+                });
+                resData.status = 200;
+                resData.message = "注册成功";
+            }else {
+                resData.message = "用户已注册";
+            }
+        }else {
+            resData.message = "比赛已关闭";
+        }
+    }
     ctx.response.type = 'application/json';
     ctx.response.body = resData;
 }
