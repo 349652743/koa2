@@ -1,2 +1,1 @@
-a2!</h1>';
-});
+var files = fs.readdirSync(__dirname + '/controllers');
