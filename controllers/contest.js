@@ -116,13 +116,14 @@ async function editContest(ctx, next){//修改比赛
 }
 async function queryContest(ctx, next){//获取比赛
     var reqData = ctx.request.body.contest;
-    var resData = {status:400};//这里需要验证一下比赛是否结束，待填坑
+    var resData = {status:400};
     await Contest.findOne({where:{id:reqData.contestId}}).then(contest=> {
         var contest = JSON.parse(JSON.stringify(contest,null,4));
+        
         resData.contest = contest;
         resData.status = 200;
-        
     });
+    
     // console.log(resData);
     ctx.response.type = 'application/json';
     ctx.response.body = resData;

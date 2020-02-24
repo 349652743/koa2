@@ -166,16 +166,20 @@ async function editUser(ctx, next){//修改用户
     ctx.response.type = 'application/json';
     ctx.response.body = resData;
 }
-async function queryUser(ctx, next){//获取用户
+async function queryUser(ctx, next){//查询用户
     var reqData = ctx.request.body.user;
     var resData = {status:400};
     console.log(reqData);
     await User.findOne({where:{studentId:reqData.studentId}}).then(user => {
         var user = JSON.parse(JSON.stringify(user,null,4));
-        if(user.haveQueried!==true){//这里需要查询一下用户是否存在，待填坑
+        if(!user){
+            resData.message = "用户未注册";
+        }else if(user.haveQueried!==true){
             resData.user = user;
             resData.status = 200;
-        }
+        }else{
+            resData.message = "您已经查询过了";
+        }   
     });
     await User.update({ haveQueried: 1 }, {
         where: {
@@ -186,11 +190,39 @@ async function queryUser(ctx, next){//获取用户
     ctx.response.type = 'application/json';
     ctx.response.body = resData;
 }
+
+async function allocateAccount(ctx,next){
+    var token = ctx.request.body.token;
+    var reqData = ctx.request.body.userlist;
+    // console.log(reqData);
+    var resData = {status:400};
+    try{
+        var decoded = await jwt.verify(token, serect);
+    }catch(err){
+        status = 400;
+    }
+    if(decoded){
+        for(var i=0;i<reqData.length;i++){
+            await User.update({ username: reqData[i].username,password:reqData[i].password,seatNumber:reqData[i].seatNumber }, {
+                where: {
+                id:reqData[i].id
+            }
+            });
+            resData.status = 200;
+            resData.message = "所有账号分配成功";
+        }
+    }else {
+        resData.message = "token验证失效，请重新登录";
+    }
+    ctx.response.type = 'application/json';
+    ctx.response.body = resData;
+}
 module.exports = {
     'POST /api/addUser' : addUser,
     'POST /api/editUserStatus' : editUserStatus,
     'POST /api/deleteUser' : deleteUser,
     'POST /api/getUser' : getUser,
     'POST /api/editUser' : editUser,
-    'POST /api/queryUser': queryUser
+    'POST /api/queryUser': queryUser,
+    'POST /api/allocateAccount': allocateAccount
 }
