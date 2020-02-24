@@ -30,7 +30,12 @@ async function addUser(ctx, next){//添加用户
     }else{//没有说明是普通用户注册
         var flag = false;
         await Contest.findByPk(reqData.contestId).then(project => {
-            if(project.dataValues.openRegister==true)flag = true;
+            if(project.dataValues.openRegister == true)flag = true;
+            var s = project.endTime;
+            s = s.replace(/-/g,"/");
+            var date = new Date(s);
+            var now = new Date();
+            if(date<now) flag = false;//只要过了结束时间必定不能注册
         })
         if(flag){
             var count = 0;
@@ -48,7 +53,7 @@ async function addUser(ctx, next){//添加用户
                 resData.message = "用户已注册";
             }
         }else {
-            resData.message = "比赛已关闭";
+            resData.message = "比赛已关闭注册";
         }
     }
     ctx.response.type = 'application/json';
@@ -147,7 +152,9 @@ async function editUser(ctx, next){//修改用户
             department:reqData.department,
             username:reqData.username,
             password:reqData.password,
-            contestId:reqData.contestId}, {
+            contestId:reqData.contestId,
+            seatNumber:reqData.seatNumber
+            }, {
             where: {
             id: reqData.id
         }
